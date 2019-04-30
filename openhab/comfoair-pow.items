@@ -1,0 +1,11 @@
+Number ComfoAir_Energy_Meter_Current_W "Current ComfoAir power usage [%d W]"  (gPersistEveryMin) { mqtt="<[mosquitto:pow/sonoff/tele/hrv1/SENSOR:state:JSONPATH($.ENERGY.Power)]" }
+Number ComfoAir_Energy_Meter_Today_KWH "Today's ComfoAir power usage [%.3f KWh]" { mqtt="<[mosquitto:pow/sonoff/tele/hrv1/SENSOR:state:JSONPATH($.ENERGY.Today)]" }
+Number ComfoAir_Energy_Meter_Yesterday_KWH "Yesterday's ComfoAir power usage [%.3f KWh]" { mqtt="<[mosquitto:pow/sonoff/tele/hrv1/SENSOR:state:JSONPATH($.ENERGY.Yesterday)]" }
+Number ComfoAir_Energy_Meter_Total_KWH "Total ComfoAir power usage [%.3f KWh]" { mqtt="<[mosquitto:pow/sonoff/tele/hrv1/SENSOR:state:JSONPATH($.ENERGY.Total)]" }
+Number ComfoAir_Energy_Meter_Period "ComfoAir power usage Since Last Period [%.3f Wh]" (gPersistEveryMinute){ mqtt="<[mosquitto:pow/sonoff/tele/hrv1/SENSOR:state:JSONPATH($.ENERGY.Period)]" }
+Switch ComfoAir_Energy_Meter_Switch "ComfoAir MAINS Power" { mqtt=">[mosquitto:pow/sonoff/cmnd/hrv1/Energy_MeterER:command:*:default],<[mosquitto:pow/sonoff/cmnd/hrv1/Energy_MeterER:state:default]" }
+
+Number ComfoAir_Energy_Meter_LastDay "ComfoAir last day total power" (gPersistEveryChange)
+Number ComfoAir_Energy_Meter_ThisMonth "ComfoAir last month total power" (gPersistEveryChange)
+Number ComfoAir_Energy_Meter_ThisYear  "ComfoAir last year total power" (gPersistEveryChange)
+Number ComfoAir_Energy_Meter_Today  "ComfoAir current day total power"

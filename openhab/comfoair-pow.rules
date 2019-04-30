@@ -1,0 +1,29 @@
+rule "Persist energy for given day"
+when
+  Time cron "57 59 23 * * ? *"
+  	        
+then
+  ComfoAir_Energy_Meter_LastDay.postUpdate(ComfoAir_Energy_Meter_Today.state as DecimalType)
+  ComfoAir_Energy_Meter_Today.postUpdate(0)
+end
+
+rule "Persist energy for longer periods"
+when
+  Time cron "0 0 0 * * ? *"
+  	        
+then
+  ComfoAir_Energy_Meter_ThisMonth.postUpdate(ComfoAir_Energy_Meter_LastDay.sumSince(now.withDayOfMonth(1).withTimeAtStartOfDay()))
+  ComfoAir_Energy_Meter_ThisYear.postUpdate(ComfoAir_Energy_Meter_LastDay.sumSince(now.withMonthOfYear(1).withDayOfMonth(1).withTimeAtStartOfDay()))
+end
+
+rule "Update ComfoAir Energy_Meter Totals for the day"
+when
+  Item ComfoAir_Energy_Meter_Period received update
+then
+  val period = ComfoAir_Energy_Meter_Period.state as Number
+  var Number forToday = 0.0
+  if (ComfoAir_Energy_Meter_Today.state != NULL) {
+    forToday = ComfoAir_Energy_Meter_Today.state as Number
+  }
+  ComfoAir_Energy_Meter_Today.postUpdate(period+forToday)
+end

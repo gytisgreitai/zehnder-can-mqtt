@@ -1,0 +1,4 @@
+__pycache__
+.vscode
+openhab/heatpump-pow.items
+openhab/heatpump-pow.rules

@@ -1,0 +1,74 @@
+rule "Set venilation level 2 if bathroom hudmity > 80"
+when 
+  Item Sensors_Thermo_Bathroom_Humidity changed
+then
+  if (Sensors_Thermo_Bathroom_Humidity.state < 80) {
+    logWarn("comfoair", "bathroom humidity: level not high enough", Sensors_Thermo_Bathroom_Humidity.state)
+    return
+  } 
+  if (ComfoAir_Ventilation_Level.state > 1 ) {
+    logWarn("comfoair", "bathroom humidity: level higher than 2", ComfoAir_Ventilation_Level.state)
+    return
+  }
+  sendCommand(ComfAir_Q350, 'ventilation_level_2')
+  createTimer(now.plusMinutes(60)) [
+    if (ComfoAir_Ventilation_Level.state == 2) {
+      logWarn("comfoair", "bathroom humidity: timer expired, resetting")
+      sendCommand(ComfAir_Q350, 'ventilation_level_1')
+    }
+  ]
+end
+
+rule "Set venilation level 2 early in the morning on weekdays"
+when 
+  Time cron "	0 45 5 ? * MON,TUE,WED,THU,FRI *"
+then
+  if (Paradox_Main_Status.state == ON ) {
+    return
+  }
+  if (ComfoAir_Ventilation_Level.state > 1 ) {
+    return
+  }
+  sendCommand(ComfAir_Q350, 'ventilation_level_2')
+  createTimer(now.plusMinutes(90)) [
+    if (ComfoAir_Ventilation_Level.state == 2) {
+      sendCommand(ComfAir_Q350, 'ventilation_level_1')
+    }
+  ]
+end
+
+rule "Set venilation level 2 early in the morning on weekends"
+when 
+  Time cron "	0 45 6 ? * SAT,SUN *"
+then
+  if (Paradox_Main_Status.state == ON ) {
+    return
+  }
+  if (ComfoAir_Ventilation_Level.state > 1 ) {
+    return
+  }
+  sendCommand(ComfAir_Q350, 'ventilation_level_2')
+  createTimer(now.plusMinutes(90)) [
+    if (ComfoAir_Ventilation_Level.state == 2) {
+      sendCommand(ComfAir_Q350, 'ventilation_level_1')
+    }
+  ]
+end
+
+rule "Set to Away after 90 min when Alarm was turned on"
+when
+  Item Paradox_Main_Status changed to ON
+then
+  createTimer(now.plusMinutes(90)) [
+    if (Paradox_Main_Status.state == ON) {
+      sendCommand(ComfAir_Q350, 'ventilation_level_0')
+    }
+  ]
+end
+
+rule "Set to 1 speed when alarm was turned off"
+when
+  Item Paradox_Main_Status changed to OFF
+then
+  sendCommand(ComfAir_Q350, 'ventilation_level_1')
+end

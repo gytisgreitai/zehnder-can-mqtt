@@ -1,0 +1,2 @@
+String ComfAir_Q350 "Comfair Q350" { mqtt=">[mosquitto:comfair/action:command:*:default]" }
+Number ComfAir_Ventilation_Level_Knob "Ventilation Level [%d]" { mqtt="<[mosquitto:comfoair/status/ventilation_level:state:default]", mqtt=">[mosquitto:comfoair/action:command:*:MAP(ventilationLevel.map)]" }
