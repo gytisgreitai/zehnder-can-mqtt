@@ -2,6 +2,7 @@ import serial
 from time import sleep
 import logging
 import sys
+import threading
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logger = logging.getLogger('comfoair-can')
@@ -47,6 +48,7 @@ class CANInterface:
   def __init__(self, device, baudrate):
     self.device = device
     self.baudrate = baudrate
+    self.write_lock = threading.Lock()
   
   def open(self):
     self.sp = serial.Serial(self.device, self.baudrate)  
@@ -55,7 +57,7 @@ class CANInterface:
   def read(self, callback):
     frame = bytearray()
     while True:
-      if self.sp.in_waiting != 0:
+      if self.sp.in_waiting != 0 and not self.write_lock.locked():
         new_byte = self._get_single_byte()
         if new_byte == self.START_BYTE_1:
           next_byte = self._get_single_byte()
@@ -75,20 +77,24 @@ class CANInterface:
         sleep(1)
 
   def send(self, data):
-    num_bytes = len(data)
-    can_id = CN1FAddr(0x11, self.COMFOAIR_ADDRESS, 1, num_bytes>8, 0, 1, self.send_sequence_nr)
-    self.send_sequence_nr = (self.send_sequence_nr + 1)&0x3
-    if len(data) > 8:
-      datagrams = int(len(data)/7)
-      if len(data) == datagrams*7:
-          datagrams -= 1
-      for n in range(datagrams):
-          self._write_to_can(can_id.bytes(), [n]+data[n*7:n*7+7])
-      n+=1
-      restlen = len(data)-n*7
-      self._write_to_can(can_id.bytes(), [n|0x80]+data[n*7:n*7+restlen])
-    else:
-      self._write_to_can(can_id.bytes(), data)
+    self.write_lock.acquire()
+    try:
+      num_bytes = len(data)
+      can_id = CN1FAddr(0x11, self.COMFOAIR_ADDRESS, 1, num_bytes>8, 0, 1, self.send_sequence_nr)
+      self.send_sequence_nr = (self.send_sequence_nr + 1)&0x3
+      if len(data) > 8:
+        datagrams = int(len(data)/7)
+        if len(data) == datagrams*7:
+            datagrams -= 1
+        for n in range(datagrams):
+            self._write_to_can(can_id.bytes(), [n]+data[n*7:n*7+7])
+        n+=1
+        restlen = len(data)-n*7
+        self._write_to_can(can_id.bytes(), [n|0x80]+data[n*7:n*7+restlen])
+      else:
+        self._write_to_can(can_id.bytes(), data)
+    finally:
+      self.write_lock.release()
   
   #----- private
   def _get_single_byte(self):
