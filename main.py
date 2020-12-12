@@ -17,9 +17,9 @@ def on_mqtt_message(client, userdata, msg):
     command = mapping.commands[action]
     logger.info('action ok, executing: %s', action)
     try:
-      for i in range(3):
+      for i in range(2):
         can.send(command)
-        sleep(2)
+        sleep(0.5)
     except Exception as e:
       logger.error('failed in send %s', e)
   else:
