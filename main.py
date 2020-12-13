@@ -7,7 +7,7 @@ import mapping
 from time import sleep
 
 def on_mqtt_connect(client, userdata, flags, rc):
-  logger.info('ubscribing to comfoair/action')
+  logger.info('subscribing to comfoair/action')
   client.subscribe('comfoair/action')
 
 def on_mqtt_message(client, userdata, msg):
@@ -17,9 +17,9 @@ def on_mqtt_message(client, userdata, msg):
     command = mapping.commands[action]
     logger.info('action ok, executing: %s', action)
     try:
-      for i in range(2):
+      for i in range(3):
         can.send(command)
-        sleep(0.5)
+        sleep(1)
     except Exception as e:
       logger.error('failed in send %s', e)
   else:
