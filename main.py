@@ -3,12 +3,17 @@ import logging
 import sys
 
 from USBCAN import CANInterface
+from hass import publish_hass_mqtt_discovery
 import mapping
 from time import sleep
+
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 def on_mqtt_connect(client, userdata, flags, rc):
   logger.info('subscribing to comfoair/action')
   client.subscribe('comfoair/action')
+  client.publish('comfoair/status', 'online', 0, True)
+  publish_hass_mqtt_discovery(client)
 
 def on_mqtt_message(client, userdata, msg):
   action =str(msg.payload.decode('utf-8'))
@@ -29,16 +34,17 @@ def process_can_message(pdid, data):
   if pdid in mapping.data:
     pdid_config = mapping.data[pdid]
     value =  pdid_config.get('transformation')(data)
-    if pdid_config.get('ok'):
+    if pdid_config.get('ok') and value is not None:
+      #logger.info('got message for pid %s raw: %s transformed: %s', pdid, data, value)
       name = pdid_config.get('name')
-      mqtt_client.publish('comfoair/status/' + name, value)
+      mqtt_client.publish('comfoair/status/' + name, value, 0, True)
     else:
       logger.info('not ok, not pushing %s %s', pdid, value)
   elif pdid != 0:
     logger.info('pid not found %s %s', pdid, data)
 
 logger = logging.getLogger('comfoair-main')
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+
 
 logger.info('starting up')
 mqtt_client = mqtt.Client()

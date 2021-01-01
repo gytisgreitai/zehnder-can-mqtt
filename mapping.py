@@ -17,6 +17,30 @@ def transform_any(value: list) -> float:
       word += value[n]<<(n*8)
   return word
 
+def transform_away(value: list) -> bool:
+    val = transform_any(value)
+    if val == 7:
+        return True
+    if val == 1:
+        return False
+    return None
+
+def transform_operating_mode(value: list) -> str:
+    val = transform_any(value)
+    if val == 255:
+        return 'auto'
+    if val == 1:
+        return 'limited_manual'
+    if val == 5:
+        return 'unlimited_manual'
+    return None
+
+def transform_operating_mode2(value: list) -> str:
+    val = transform_any(value)
+    if val == 1:
+        return 'unlimited_manual'
+    return 'auto'
+
 
 # 8415 0601 00000000 100e0000 01	Set ventilation mode: supply only for 1 hour
 # 8515 0601	Set ventilation mode: balance mode
@@ -60,11 +84,12 @@ commands = {
 
 data = {
   16: {
-      "name": "z_unknown_NwoNode",
-      "ok" : False,
+      "name": "away_indicator",
+      "ok" : True,
       "unit": "",
-      "transformation": transform_any
-  },
+      "icon": "mdi:m³home-export-outline",
+      "transformation": transform_away
+  }, 
   17: {
       "name": "z_unknown_NwoNode",
       "ok" : False,
@@ -77,17 +102,40 @@ data = {
       "unit": "",
       "transformation": transform_any
   },
+  49: {
+      "name": "operating_mode",
+      "ok" : True,
+      "unit": "",
+      "icon": "mdi:m³brightness-auto",
+      "transformation": transform_operating_mode
+  },
+  56: {
+      "name": "operating_mode2",
+      "ok" : True,
+      "unit": "",
+      "icon": "mdi:m³brightness-auto",
+      "transformation": transform_operating_mode2
+  },
   65: {
       "name": "ventilation_level",
       "ok" : True,
-      "unit": "level",
+      "unit": "",
+      "icon": "mdi:fan",
       "transformation": lambda x: int(x[0])
   },
   66: {
       "name": "bypass_state",
       "ok" : True,
-      "unit": "0=auto,1=open,2=close",
-      "transformation": lambda x: float(x[0])
+      "unit": "",
+      "icon": "mdi:m³gate-open", 
+      "transformation": lambda x: ['auto', 'open', 'close'][int(x[0])]
+  },
+  67: {
+      "name": "temperature_profile",
+      "ok" : True,
+      "unit": "", 
+      "icon": "mdi:thermometer-lines",
+      "transformation": lambda x: ['normal', 'cold', 'warm'][int(x[0])]
   },
   81: {
       "name": "timer_1",
@@ -146,104 +194,121 @@ data = {
   97: {
       "name": "bypass_b_status",
       "ok" : True,
-      "unit": "unknown",
+      "icon": "mdi:gate-open",
+      "unit": "",
       "transformation": transform_air_volume
   },
   98: {
       "name": "bypass_a_status",
       "ok" : True,
-      "unit": "unknown",
+      "icon": "mdi:gate-open", 
+      "unit": "",
       "transformation": transform_air_volume
   },
   115: {
       "name": "fan_exhaust_enabled",
       "ok" : True,
       "unit": "",
+      "icon": "mdi:fan-chevron-down",
       "transformation": transform_any
   },
   116: {
       "name": "fan_supply_enabled",
       "ok" : True,
       "unit": "",
+      "icon": "mdi:fan-chevron-up",
       "transformation": transform_any
   },
   117: {
       "name": "fan_exhaust_duty",
       "ok" : True,
       "unit": "%",
+      "icon": "mdi:fan-chevron-down",
       "transformation": lambda x: float(x[0])
   },
   118: {
       "name": "fan_supply_duty",
       "ok" : True,
       "unit": "%",
+      "icon": "mdi:fan-chevron-up",
       "transformation": lambda x: float(x[0])
   },
   119: {
       "name": "fan_exhaust_flow",
       "ok" : True,
-      "unit": "m3",
+      "unit": "m³",
+      "icon": "mdi:fan",
       "transformation": transform_air_volume
   },
   120: {
       "name": "fan_supply_flow",
       "ok" : True,
-      "unit": "m3",
+      "unit": "m³",
+      "icon": "mdi:fan",
       "transformation": transform_air_volume
   },
   121: {
       "name": "fan_exhaust_speed",
       "ok" : True,
       "unit": "rpm",
+      "icon": "mdi:speedometer",
       "transformation": transform_air_volume
   },
   122: {
       "name": "fan_supply_speed",
       "ok" : True,
       "unit": "rpm",
+      "icon": "mdi:speedometer",
       "transformation": transform_air_volume
   },
   128: {
       "name": "power_consumption_ventilation",
       "ok" : True,
       "unit": "W",
+      "icon": "mdi:power-socket-eu",
       "transformation": lambda x: float(x[0])
   },
   129: {
       "name": "power_consumption_year_to_date",
       "ok" : True,
       "unit": "kWh",
+      "mdi": "mdi:power-plug",
       "transformation": transform_air_volume
   },
   130: {
       "name": "power_consumption_total_from_start",
       "ok" : True,
       "unit": "kWh",
+      "mdi": "mdi:power-plug",
       "transformation": transform_air_volume
   },
   144: {
       "name": "power_consumption_preheater_year_to_date",
       "ok" : True,
       "unit": "kWh",
+      "mdi": "mdi:power-plug",
       "transformation": transform_any
   },
   145: {
       "name": "power_consumption_preheater_from_start",
       "ok" : True,
       "unit": "kWh",
+      "mdi": "mdi:power-plug",
       "transformation": transform_any
   },
   146: {
       "name": "power_consumption_preheater_current",
       "ok" : True,
       "unit": "W",
+      "mdi": "mdi:power-plug",
       "transformation": transform_any
   },
   192: {
       "name": "days_until_next_filter_change",
       "ok" : True,
       "unit": "days",
-      "transformation": transform_air_volume
+      "mdi": "mdi:air-filter",
+      "transformation": transform_any
   },
   208: {
       "name": "z_Unknown_TempHumConf",
@@ -255,6 +320,7 @@ data = {
       "name" : "rmot",
       "ok" : True,
       "unit":"°C",
+      "icon": "mdi:thermometer-alert",
       "transformation":transform_temperature
   },
   210: {
@@ -273,60 +339,70 @@ data = {
       "name": "target_temperature",
       "ok" : True,
       "unit": "°C",
+      "icon": "mdi:thermometer-lines",
       "transformation": transform_temperature
   },
   213: {
       "name": "power_avoided_heating_actual",
       "ok" : True,
       "unit": "W",
+      "icon": "mdi:power-plug-off-outline",
       "transformation": transform_any
   },
   214: {
       "name": "power_avoided_heating_year_to_date",
       "ok" : True,
       "unit": "kWh",
+      "icon": "mdi:power-plug-off-outline",
       "transformation": transform_air_volume
   },
   215: {
       "name": "power_avoided_heating_from_start",
       "ok" : True,
       "unit": "kWh",
+      "icon": "mdi:power-plug-off-outline",
       "transformation": transform_air_volume
   },
   216: {
       "name": "power_avoided_cooling_actual",
       "ok" : True,
       "unit": "W",
+      "icon": "mdi:power-plug-off-outline",
       "transformation": transform_any
   },
   217: {
       "name": "power_avoided_cooling_year_to_date",
       "ok" : True,
       "unit": "kWh",
+      "icon": "mdi:power-plug-off-outline",
       "transformation": transform_air_volume
   },
   218: {
       "name": "power_avoided_cooling_from_start",
       "ok" : True,
       "unit": "kWh",
+      "icon": "mdi:power-plug-off-outline",
       "transformation": transform_air_volume
   },
   219: {
       "name": "power_preheater_target",
       "ok" : True,
       "unit": "W",
+      "icon": "mdi:power-plug",
       "transformation": transform_any
   },
   220: {
       "name": "air_supply_temperature_before_preheater",
       "ok" : True,
       "unit": "°C",
+      "icon": "mdi:thermometer",
       "transformation": transform_temperature
   },
   221: {
       "name": "air_supply_temperature",
       "ok" : True,
       "unit": "°C",
+      "icon": "mdi:thermometer",
       "transformation": transform_temperature
   },
   222: {
@@ -386,36 +462,42 @@ data = {
   273: {
       "name": "temperature_unknown",
       "unit": "°C",
+      "ok": False,
       "transformation": transform_temperature
   },
   274: {
       "name": "air_extract_temperature",
       "ok" : True,
       "unit": "°C",
+      "icon": "mdi:home-thermometer-outline",
       "transformation": transform_temperature
   },
   275: {
       "name": "air_exhaust_temperature",
       "ok" : True,
       "unit": "°C",
+      "icon": "mdi:home-thermometer-outline",
       "transformation": transform_temperature
   },
   276: {
       "name": "air_outdoor_temperature_before_preheater",
       "ok" : True,
       "unit": "°C",
+      "icon": "mdi:thermometer",
       "transformation": transform_temperature
   },
   277: {
       "name": "air_outdoor_temperature",
       "ok" : True,
       "unit": "°C",
+      "icon": "mdi:thermometer",
       "transformation": transform_temperature
   },
   278: {
       "name": "air_supply_temperature_2",
       "ok" : True,
       "unit": "°C",
+      "icon": "mdi:thermometer",
       "transformation": transform_temperature
   },
   289: {
@@ -427,30 +509,35 @@ data = {
       "name": "air_extract_humidity",
       "ok" : True,
       "unit": "%",
+      "icon": "mdi:water-percent",
       "transformation": lambda x: float(x[0])
   },
   291: {
       "name": "air_exhaust_humidity", 
       "ok" : True,
-      "unit": "%", 
+      "unit": "%",
+      "icon": "mdi:water-percent",
       "transformation": lambda x: float(x[0]) 
   }, 
   292: {
       "name": "air_outdoor_humidity_before_preheater",
       "ok" : True,
       "unit": "%",
+      "icon": "mdi:water-percent",
       "transformation": lambda x: float(x[0])
   },
   293: {
       "name": "air_outdoor_humidity",
       "ok" : True,
       "unit": "%",
+      "icon": "mdi:water-percent",
       "transformation": lambda x: float(x[0])
   },
   294: {
       "name": "air_supply_humidity",
       "ok" : True,
       "unit": "%",
+      "icon": "mdi:water-percent",
       "transformation": lambda x: float(x[0])
   },
 
@@ -458,12 +545,14 @@ data = {
       "name": "pressure_exhaust",
       "ok" : True,
       "unit": "Pa",
+      "icon": "mdi:package-down",
       "transformation": transform_any
   },
   306: {
       "name": "pressure_supply",
       "ok" : True,
       "unit": "Pa",
+      "icon": "mdi:package-down",
       "transformation": transform_any
   },
 
