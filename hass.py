@@ -26,7 +26,7 @@ def publish_hass_mqtt_discovery(mqtt_client):
         continue
     
       payload = {
-        "name": f"comfoair_{friendly_name}",
+        "name": f"{friendly_name}",
         "state_topic": f"comfoair/status/{id}",
         "availability_topic": "comfoair/status",
         "platform": "mqtt",
